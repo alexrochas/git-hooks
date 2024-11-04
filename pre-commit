@@ -16,12 +16,12 @@ fi
 # Move to the root directory
 cd "$REPO_ROOT" || exit
 
-# Check if nx is installed
-if ! command -v nx &> /dev/null; then
-  echo "Error: 'nx' command not found."
-  echo "Please install it globally with one of the following commands:"
-  echo "  npm install -g nx"
-  echo "  yarn global add nx"
+# Check if nx is available locally or via npx
+if ! npx nx --version &> /dev/null; then
+  echo "Error: 'nx' command not found locally or via npx."
+  echo "Please install it in the project with one of the following commands:"
+  echo "  npm install nx --save-dev"
+  echo "  yarn add nx --dev"
   exit 1
 fi
 
@@ -42,7 +42,7 @@ npx prettier --write $CHANGED_FILES
 git add $CHANGED_FILES
 
 # Get the list of affected projects based on the changed files
-AFFECTED_PROJECTS=$(nx show projects --affected --files=$CHANGED_FILES --target=lint --select=projects)
+AFFECTED_PROJECTS=$(npx nx show projects --affected --files=$CHANGED_FILES --target=lint --select=projects)
 
 if [ -z "$AFFECTED_PROJECTS" ]; then
   echo "No affected projects found for the changed files. Skipping lint."
@@ -52,7 +52,7 @@ fi
 # Run Nx lint on all affected projects
 echo "Running Nx lint on the affected projects:"
 echo "$AFFECTED_PROJECTS"
-nx run-many --target=lint --projects=$AFFECTED_PROJECTS --fix --silent
+npx nx run-many --target=lint --projects=$AFFECTED_PROJECTS --fix --silent
 LINT_EXIT_CODE=$?
 
 # Check if the linter was able to fix all errors
